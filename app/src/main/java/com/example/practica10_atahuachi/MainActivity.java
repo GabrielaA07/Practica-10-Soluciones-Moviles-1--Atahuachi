@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Picasso.get()
                         .load(model.getMoviePoster())
-                        .centerCrop()
+                        .fit().centerCrop()
                         .into(holder.ivMoviePoster);
 
                 //TODO: CODIGO PARA LOS BOTONES DE MANTENIMIENTO
@@ -98,9 +99,58 @@ public class MainActivity extends AppCompatActivity {
             @NonNull
             @Override
             public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return null;
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.movie_board_item, parent, false);
+                MovieViewHolder movieViewHolder = new MovieViewHolder(view);
+                return movieViewHolder;
             }
         };
+
+        //ESTABLECER EL ADAPTADOR
+        recyclerView.setAdapter(adapter);
+        adapter.startListening();
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: ADD MOVIE
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.frame_container, new AddMovieFragment())
+                        .addToBackStack(null)
+                        .commit();
+                //ANIMATION
+                shrinkAnim.setDuration(400);
+                fab.setAnimation(shrinkAnim);
+                shrinkAnim.start();
+                shrinkAnim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        //nothing
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        fab.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        if (fab.getVisibility() == View.GONE) {
+            fab.setVisibility(View.VISIBLE);
+        }
     }
 
     public static class MovieViewHolder extends RecyclerView.ViewHolder {
